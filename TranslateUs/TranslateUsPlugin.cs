@@ -34,6 +34,7 @@ public partial class TranslateUsPlugin : BasePlugin
         {
             cl = new TcpClient("127.0.0.1", 20110);
         }
+
         ProcessStartInfo inf = new ProcessStartInfo()
         {
             FileName = "java",
@@ -49,8 +50,11 @@ public partial class TranslateUsPlugin : BasePlugin
         Process libretranslate = Process.Start(inf2);
         Process LanguageManager = Process.Start(inf);
 
+        libretranslate.EnableRaisingEvents = true;
         LanguageManager.EnableRaisingEvents = true;
         EventHandler callback = null;
+        EventHandler callback2 = null;
+
         callback = (o, b) =>
         {
             LanguageManager = Process.Start(inf);
@@ -58,7 +62,15 @@ public partial class TranslateUsPlugin : BasePlugin
             LanguageManager.Exited += callback;
         };
 
+        callback2 = (o, b) =>
+        {
+            libretranslate = Process.Start(inf2);
+            libretranslate.EnableRaisingEvents = true;
+            libretranslate.Exited += callback2;
+        };
+
         LanguageManager.Exited += callback;
+        libretranslate.Exited += callback2;
 
         translator = new ChatTranslator();
         translationLanguagesManager = new TranslationLanguagesManager();
